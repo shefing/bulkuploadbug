@@ -80,6 +80,12 @@ export const Posts: CollectionConfig<'posts'> = {
         {
           fields: [
             {
+              name: 'researchMultiUpload',
+              type: 'upload',
+              relationTo: 'research-documents',
+              hasMany: true
+            },
+            {
               name: 'heroImage',
               type: 'upload',
               relationTo: 'media',
