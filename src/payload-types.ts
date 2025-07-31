@@ -7,6 +7,52 @@
  */
 
 /**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "StockType".
+ */
+export type StockType = 'a' | null;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "StockOrigin".
+ */
+export type StockOrigin = 'TASE' | 'Foreign' | 'Private';
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MeetingType".
+ */
+export type MeetingType = string | null;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MeetingState".
+ */
+export type MeetingState = string | null;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MeetingAgenda".
+ */
+export type MeetingAgenda =
+  | {
+      text: string;
+      isRemovedFromAgenda?: boolean | null;
+      topicType: 'reporting' | 'decision';
+      majorityType?: ('regular' | 'privileged') | null;
+      recommendation?: {
+        votingRecommendation?: ('----' | 'בעד' | 'נגד' | 'נמנע' | 'דיון') | null;
+        reasonRef?: string | null;
+        reasonText?: string | null;
+      };
+      exceptionalRecommendation?: {
+        showExceptional?: boolean | null;
+        votingRecommendation?: ('----' | 'בעד' | 'נגד' | 'נמנע' | 'דיון') | null;
+        reasonRef?: string | null;
+        reasonText?: string | null;
+      };
+      result?: ('0' | '1' | '2' | '3') | null;
+      vPercentSpecial?: number | null;
+      id?: string | null;
+    }[]
+  | null;
+/**
  * Supported timezones in IANA format.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -67,6 +113,8 @@ export interface Config {
   };
   blocks: {};
   collections: {
+    meetings: Meeting;
+    stocks: Stock;
     pages: Page;
     posts: Post;
     media: Media;
@@ -81,9 +129,16 @@ export interface Config {
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
+    'payload-query-presets': PayloadQueryPreset;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    stocks: {
+      relations: 'stocks';
+    };
+  };
   collectionsSelect: {
+    meetings: MeetingsSelect<false> | MeetingsSelect<true>;
+    stocks: StocksSelect<false> | StocksSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
@@ -98,6 +153,7 @@ export interface Config {
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
+    'payload-query-presets': PayloadQueryPresetsSelect<false> | PayloadQueryPresetsSelect<true>;
   };
   db: {
     defaultIDType: string;
@@ -141,6 +197,161 @@ export interface UserAuthOperations {
   unlock: {
     email: string;
     password: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "meetings".
+ */
+export interface Meeting {
+  id: string;
+  stock: string | Stock;
+  origin?: string | null;
+  type?: MeetingType;
+  meetingId?: string | null;
+  magnaId?: string | null;
+  invitationLink?: string | null;
+  invitationDocument?: (string | null) | Media;
+  fullName?: string | null;
+  state?: MeetingState;
+  holdingsLimit?: string | null;
+  proxyVotingDate?: string | null;
+  meetingDate?: string | null;
+  dualMeeting?: (string | null) | Meeting;
+  location?: string | null;
+  comments?: string | null;
+  resultsConfirmationStatus?: boolean | null;
+  electronicVotingEnabled?: boolean | null;
+  agenda?: MeetingAgenda;
+  researchDocuments?: (string | Media)[] | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "stocks".
+ */
+export interface Stock {
+  id: string;
+  stockId: string;
+  fullName?: string | null;
+  type?: StockType;
+  fromMagna?: boolean | null;
+  origin: StockOrigin;
+  tradable?: boolean | null;
+  relatedStock?: (string | null) | Stock;
+  active?: boolean | null;
+  isFinancial?: boolean | null;
+  isDual?: boolean | null;
+  dualStock?: (string | null) | Stock;
+  symbol?: string | null;
+  name?: string | null;
+  longName?: string | null;
+  comments?: string | null;
+  relations?: {
+    docs?: (string | Stock)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  meetings?: {
+    docs?: (string | Meeting)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: string;
+  alt?: string | null;
+  caption?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    square?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    small?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    medium?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    large?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    xlarge?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    og?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
   };
 }
 /**
@@ -275,98 +486,6 @@ export interface ResearchDocument {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
- */
-export interface Media {
-  id: string;
-  alt?: string | null;
-  caption?: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-  sizes?: {
-    thumbnail?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    square?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    small?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    medium?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    large?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    xlarge?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    og?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -930,6 +1049,14 @@ export interface PayloadLockedDocument {
   id: string;
   document?:
     | ({
+        relationTo: 'meetings';
+        value: string | Meeting;
+      } | null)
+    | ({
+        relationTo: 'stocks';
+        value: string | Stock;
+      } | null)
+    | ({
         relationTo: 'pages';
         value: string | Page;
       } | null)
@@ -1014,6 +1141,135 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-query-presets".
+ */
+export interface PayloadQueryPreset {
+  id: string;
+  title: string;
+  isShared?: boolean | null;
+  access?: {
+    read?: {
+      constraint?: ('everyone' | 'onlyMe' | 'specificUsers') | null;
+      users?: (string | User)[] | null;
+    };
+    update?: {
+      constraint?: ('everyone' | 'onlyMe' | 'specificUsers') | null;
+      users?: (string | User)[] | null;
+    };
+    delete?: {
+      constraint?: ('everyone' | 'onlyMe' | 'specificUsers') | null;
+      users?: (string | User)[] | null;
+    };
+  };
+  where?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  columns?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  relatedCollection: 'meetings' | 'stocks';
+  /**
+   * This is a tempoary field used to determine if updating the preset would remove the user's access to it. When `true`, this record will be deleted after running the preset's `validate` function.
+   */
+  isTemp?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "meetings_select".
+ */
+export interface MeetingsSelect<T extends boolean = true> {
+  stock?: T;
+  origin?: T;
+  type?: T;
+  meetingId?: T;
+  magnaId?: T;
+  invitationLink?: T;
+  invitationDocument?: T;
+  fullName?: T;
+  state?: T;
+  holdingsLimit?: T;
+  proxyVotingDate?: T;
+  meetingDate?: T;
+  dualMeeting?: T;
+  location?: T;
+  comments?: T;
+  resultsConfirmationStatus?: T;
+  electronicVotingEnabled?: T;
+  agenda?: T | MeetingAgendaSelect<T>;
+  researchDocuments?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MeetingAgenda_select".
+ */
+export interface MeetingAgendaSelect<T extends boolean = true> {
+  text?: T;
+  isRemovedFromAgenda?: T;
+  topicType?: T;
+  majorityType?: T;
+  recommendation?:
+    | T
+    | {
+        votingRecommendation?: T;
+        reasonRef?: T;
+        reasonText?: T;
+      };
+  exceptionalRecommendation?:
+    | T
+    | {
+        showExceptional?: T;
+        votingRecommendation?: T;
+        reasonRef?: T;
+        reasonText?: T;
+      };
+  result?: T;
+  vPercentSpecial?: T;
+  id?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "stocks_select".
+ */
+export interface StocksSelect<T extends boolean = true> {
+  stockId?: T;
+  fullName?: T;
+  type?: T;
+  fromMagna?: T;
+  origin?: T;
+  tradable?: T;
+  relatedStock?: T;
+  active?: T;
+  isFinancial?: T;
+  isDual?: T;
+  dualStock?: T;
+  symbol?: T;
+  name?: T;
+  longName?: T;
+  comments?: T;
+  relations?: T;
+  meetings?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1588,6 +1844,42 @@ export interface PayloadPreferencesSelect<T extends boolean = true> {
 export interface PayloadMigrationsSelect<T extends boolean = true> {
   name?: T;
   batch?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-query-presets_select".
+ */
+export interface PayloadQueryPresetsSelect<T extends boolean = true> {
+  title?: T;
+  isShared?: T;
+  access?:
+    | T
+    | {
+        read?:
+          | T
+          | {
+              constraint?: T;
+              users?: T;
+            };
+        update?:
+          | T
+          | {
+              constraint?: T;
+              users?: T;
+            };
+        delete?:
+          | T
+          | {
+              constraint?: T;
+              users?: T;
+            };
+      };
+  where?: T;
+  columns?: T;
+  relatedCollection?: T;
+  isTemp?: T;
   updatedAt?: T;
   createdAt?: T;
 }
