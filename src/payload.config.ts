@@ -9,8 +9,8 @@ import { fileURLToPath } from 'url'
 import { Categories } from './collections/Categories'
 import { Media } from './collections/Media'
 import { ResearchDocument } from './collections/ResearchDocument'
-import {Meetings} from '@/collections/Meetings'
-import {Stocks} from '@/collections/Stocks'
+import { Meetings } from '@/collections/Meetings'
+import { Stocks } from '@/collections/Stocks'
 
 import { Pages } from './collections/Pages'
 import { Posts } from './collections/Posts'
@@ -20,7 +20,6 @@ import { Header } from './Header/config'
 import { plugins } from './plugins'
 import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
-import { gcsStorage } from '@payloadcms/storage-gcs'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -72,17 +71,6 @@ export default buildConfig({
   globals: [Header, Footer],
   plugins: [
     ...plugins,
-    gcsStorage({
-      collections: {
-        'research-documents': true,
-      },
-      enabled: !!process.env.GCS_BUCKET,
-      bucket: process.env.GCS_BUCKET || '',
-      options: {
-        apiEndpoint: process.env.GCS_ENDPOINT,
-        projectId: process.env.GCS_PROJECT_ID,
-      },
-    }),
     // storage-adapter-placeholder
   ],
   secret: process.env.PAYLOAD_SECRET,
